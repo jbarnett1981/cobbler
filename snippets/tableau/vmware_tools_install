@@ -1,0 +1,20 @@
+if [ "$hwtype" = "VMware, Inc." ]; then
+## Vmware Virtual Machine
+wget -O /root/vmware-tools.tar.gz http://cobbler.dev.tsi.lan/repo/bits/VMwareTools-9.4.10-2068191.tar.gz
+tar xzvf /root/vmware-tools.tar.gz -C /root/
+/root/vmware-tools-distrib/vmware-install.pl --default
+touch /etc/vmware-tools/not_configured
+rm -rf /root/vmware-tools.tar.gz
+rm -rf /root/vmware-tools-distrib/
+
+# Enable vmware tools to reconfigure itself after kernel update
+cat >> /etc/rc.local <<EOF
+# Run vmware-config-tools on startup for current kernel
+if [ -e /etc/vmware-tools/not_configured ]; then
+echo "Running vmware-config-tools.pl for running kernel:"
+/usr/bin/vmware-config-tools.pl --default
+rm /etc/vmware-tools/not_configured
+exit 0
+fi
+EOF
+fi

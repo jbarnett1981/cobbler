@@ -1,0 +1,44 @@
+# Add it and devlocal user and set passwd
+USER=it
+PASS=k9isa2th
+/usr/sbin/useradd -p \$(openssl passwd -1 \$PASS) \$USER
+/usr/sbin/usermod -a -G adm,cdrom,sudo,dip,plugdev,lpadmin,sambashare,libvirtd \$USER
+
+USER2=devlocal
+PASS2=devlocal
+/usr/sbin/useradd -p \$(openssl passwd -1 \$PASS) \$USER
+
+# Create DevIT dir
+mkdir -p /usr/local/devit
+chmod 775 /usr/local/devit
+chmod it:root /usr/local/devit
+
+# Install required tools
+yum -y install net-tools openssh-server git samba-client samba-common cifs-utils
+
+# Install git repo for devit
+cd /tmp
+git clone https://devit-admin:1xKAWF6mm6@gitlab.tableausoftware.com/devit/linux.git
+rm linux/imaging/packer*
+mv linux/imaging/* /usr/local/devit
+chmod +x /usr/local/devit/*
+chown it:root /usr/local/devit/*
+rm -rf linux
+
+# Replace sudoers file
+curl -o /etc/sudoers http://puppetshare.dev.tsi.lan/sudoers/centos.sudoers
+
+# Update yum repos
+bash /usr/local/devit/tableau_repo.sh
+
+# Install EPEL repo
+wget -P /usr/local/devit https://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+sudo yum install /usr/local/devit/epel-release-7-5.noarch.rpm
+sudo yum install htop screen yum-utils mlocate mesa-libGLU-devel glibc-devel.i686 gmp-devel libmpc-devel mpfr-devel
+wget -r -np -nH --reject="index.html*" -P /usr/local/devit http://puppetshare.dev.tsi.lan/RPMs/
+sudo rpm -Uvh /usr/local/devit/RPMs/*.rpm
+
+# Update system to current
+yum clean all
+yum update -y
+yum -y remove rhnsd

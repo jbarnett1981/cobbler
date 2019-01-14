@@ -1,0 +1,10 @@
+#!/bin/bash
+## create user devlocal with password of P@ssw0rd!
+useradd -m -d /home/devlocal -s /bin/bash -p '$6$cEClKKKa$4NXOdz0HR0ZLwgKuMb7m02KQM3UgGSipZz9spi.pGQjCVYkwwlJnkUV0JqlhaDxqUbsJP9h    vgmeJfBa0TCKAG.' devlocal
+## create user it with password see keepass
+useradd -m -d /home/it -s /bin/bash -p '$1$6982c48E$5Ap/qdWzYDGG.8fqsNSpz0' it
+## create directory /usr/local/devit
+mkdir /usr/local/devit
+## modify directory /usr/local/devit
+chmod 775 /usr/local/devit
+chown it:root /usr/local/devit

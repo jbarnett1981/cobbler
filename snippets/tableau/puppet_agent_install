@@ -1,0 +1,13 @@
+rpm -Uvh http://yum.puppetlabs.com/puppetlabs-release-el-7.noarch.rpm
+yum -y install puppet-3.7.3
+
+cat > /etc/puppet/puppet.conf << EOF
+[main]
+server=puppet.dev.tsi.lan
+pluginsync=true
+autoflush=true
+report=true
+rundir = /var/run/puppet
+EOF
+
+chkconfig puppet on

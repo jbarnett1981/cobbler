@@ -1,0 +1,40 @@
+cat >> /tmp/pbis_domain_join.sh << EOF
+#!/bin/bash
+sleep 25
+curl -o install_pbis.sh http://puppetshare.dev.tsi.lan/likewise/pbis-open-8.2.1.2979.linux.x86_64.rpm.sh
+chmod +x install_pbis.sh
+#wget http://puppetshare.dev.tsi.lan/likewise/lwsmd.service
+curl -o /lib/systemd/system/lwsmd.service http://puppetshare.dev.tsi.lan/likewise/lwsmd.service
+yes | bash install_pbis.sh
+ln -s /lib/systemd/system/lwsmd.service /etc/systemd/system
+systemctl enable lwsmd.service
+
+## TSI.LAN domain join credentials ##
+ADUSER='svc_domainjoin_devit'
+ADPASS='Join2tsi.lan.Domain!'
+
+## Get domain var
+read DOMAIN < /tmp/domain
+
+echo "Joining \\$DOMAIN"
+/opt/pbis/bin/domainjoin-cli join --ou TSI_DevIT/General \\$DOMAIN \\$ADUSER \\$ADPASS
+
+echo "Configuring Domain Settings"
+/opt/pbis/bin/config AssumeDefaultDomain true
+/opt/pbis/bin/config UserDomainPrefix tsi
+/opt/pbis/bin/config LoginShellTemplate /bin/bash
+
+echo "Updating DNS and adding to cron"
+curl -o /etc/cron.daily/dns http://puppetshare.dev.tsi.lan/likewise/dns
+chmod u+x /etc/cron.daily/dns
+/opt/pbis/bin/update-dns
+
+### Cleanup
+rm /tmp/domain
+EOF
+
+chmod +x /tmp/pbis_domain.join.sh
+echo "if [ -f /tmp/pbis_domain_join.sh ]; then bash /tmp/pbis_domain_join.sh && rm /tmp/pbis_domain_join.sh; fi" >> /etc/rc.local
+chmod +x /etc/rc.d/rc.local
+touch /tmp/ADD_TO_DOMAIN
+systemctl enable NetworkManager-wait-online

@@ -1,0 +1,10 @@
+!/bin/bash
+# download our internal repo file
+curl -o /etc/apt/sources.list http://puppetshare.dev.tsi.lan/repos/ubuntu/sources.list
+apt-get update
+# install other essentials
+apt-get install -y nfs-common
+apt-get install -y smbclient
+apt-get install -y cifs-utils
+apt-get install -y sysv-rc-conf
+apt-get install -y vim
